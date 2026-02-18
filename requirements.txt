@@ -9,3 +9,4 @@ Pillow
 reportlab
 PyPDF2
 tiktoken
+PyMuPDF
