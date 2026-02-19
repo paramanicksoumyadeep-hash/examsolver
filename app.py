@@ -1,3 +1,4 @@
+import shutil
 import streamlit as st
 from ocr.pdf_to_text import extract_text_from_pdf
 from llm.solver import solve_exam
