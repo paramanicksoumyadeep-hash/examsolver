@@ -5,7 +5,6 @@ import time
 
 API_KEY = "AIzaSyDgyfY0nWwCaUKmFVwtSbA2UPdRxwBV9tI"
 
-# Models ordered from best → cheapest
 MODEL_FALLBACKS = [
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
@@ -22,20 +21,18 @@ Solve {exam} questions.
 STRICT OUTPUT RULES (MANDATORY):
 
 1. MCQ (single correct):
-   - Output ONLY the option letter: A, B, C, or D
-   - NEVER output the option value (e.g. 30, 36, 2097152)
+   - Output ONLY the option letter and option value: A, B, C, or D
    - If the correct answer does NOT exactly match any option,
      LEAVE THE ANSWER BLANK
 
 2. MSQ (multiple correct):
-   - Output option letters only
+   - Output option letters and option value
    - Format: A, C (comma + space)
    - Sort alphabetically
    - If unsure or partial → LEAVE BLANK
 
 3. NAT / Integer / Decimal:
-   - Output ONLY the numeric value
-   - No units, no text
+   - Output ONLY the numeric value and unit
 
 4. Negative marking applies:
    - If unsure, DO NOT GUESS
@@ -46,9 +43,9 @@ STRICT OUTPUT RULES (MANDATORY):
    - Question number followed by colon
 
 EXAMPLES:
-Q1: A
-Q2: A, C
-Q3: 12
+Q1: A)Starvation
+Q2: A)Deadlock, C)Hold and Wait
+Q3: 23cm
 Q4:
 Q5: 0.25
 
@@ -59,9 +56,6 @@ QUESTIONS:
 """
 )
 
-# -------------------------------
-# 🔹 Model fallback solver
-# -------------------------------
 def solve_questions(exam, questions):
     last_error = None
 
@@ -92,18 +86,11 @@ def solve_questions(exam, questions):
 
     raise RuntimeError("❌ All Gemini models exhausted")
 
-
-# -------------------------------
-# 🔹 Batching logic (20–30 Qs)
-# -------------------------------
 def batch_questions(questions, batch_size=25):
     for i in range(0, len(questions), batch_size):
         yield questions[i:i + batch_size]
 
 
-# -------------------------------
-# 🔹 Main exam solver (FIXED)
-# -------------------------------
 def solve_exam(exam, questions, batch_size=25):
     """
     exam: str
