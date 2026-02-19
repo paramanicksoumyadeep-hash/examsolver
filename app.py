@@ -4,6 +4,7 @@ from ocr.pdf_to_text import extract_text_from_pdf
 from llm.solver import solve_exam
 from pdf_utils.generate_pdf import create_answer_pdf
 from grading.evaluate import parse_answers_robust, smart_evaluate
+import pytesseract
 
 st.write("Tesseract path:", shutil.which("tesseract"))
 
