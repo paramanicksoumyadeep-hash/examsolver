@@ -5,6 +5,7 @@ import time
 
 API_KEY = "AIzaSyDgyfY0nWwCaUKmFVwtSbA2UPdRxwBV9tI"
 
+# Models ordered from best → cheapest
 MODEL_FALLBACKS = [
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
@@ -16,34 +17,38 @@ MODEL_FALLBACKS = [
 prompt = PromptTemplate(
     input_variables=["exam", "questions"],
     template="""
-Solve the exam questions.
+Solve {exam} questions.
 
-OUTPUT RULES (STRICT):
+STRICT OUTPUT RULES (MANDATORY):
 
-MCQ (single correct):
-- Output: A)OptionText
-- If no exact match → leave blank
+1. MCQ (single correct):
+   - Output ONLY the option letter: A, B, C, or D
+   - NEVER output the option value (e.g. 30, 36, 2097152)
+   - If the correct answer does NOT exactly match any option,
+     LEAVE THE ANSWER BLANK
 
-MSQ (multiple correct):
-- Output: A)OptionText, C)OptionText
-- Alphabetical order
-- If unsure/partial → leave blank
+2. MSQ (multiple correct):
+   - Output option letters only
+   - Format: A, C (comma + space)
+   - Sort alphabetically
+   - If unsure or partial → LEAVE BLANK
 
-NAT (integer/decimal):
-- Output: numeric value + unit (if given)
-- No text explanation
+3. NAT / Integer / Decimal:
+   - Output ONLY the numeric value
+   - No units, no text
 
-GENERAL:
-- One answer per line
-- Format: Q<number>: <answer>
-- If unsure → leave blank
-- Do NOT explain
-- Do NOT add extra text
+4. Negative marking applies:
+   - If unsure, DO NOT GUESS
+   - Blank answer is safer than wrong
 
-EXAMPLE:
-Q1: A)Starvation
-Q2: A)Deadlock, C)Hold and Wait
-Q3: 23cm
+5. Output format is FIXED:
+   - One answer per line
+   - Question number followed by colon
+
+EXAMPLES:
+Q1: A
+Q2: A, C
+Q3: 12
 Q4:
 Q5: 0.25
 
@@ -54,6 +59,9 @@ QUESTIONS:
 """
 )
 
+# -------------------------------
+# 🔹 Model fallback solver
+# -------------------------------
 def solve_questions(exam, questions):
     last_error = None
 
@@ -84,11 +92,18 @@ def solve_questions(exam, questions):
 
     raise RuntimeError("❌ All Gemini models exhausted")
 
+
+# -------------------------------
+# 🔹 Batching logic (20–30 Qs)
+# -------------------------------
 def batch_questions(questions, batch_size=25):
     for i in range(0, len(questions), batch_size):
         yield questions[i:i + batch_size]
 
 
+# -------------------------------
+# 🔹 Main exam solver (FIXED)
+# -------------------------------
 def solve_exam(exam, questions, batch_size=25):
     """
     exam: str
@@ -109,4 +124,5 @@ def solve_exam(exam, questions, batch_size=25):
         time.sleep(1)  # RPM-safe
 
     return "\n".join(final_answers)
+
 
