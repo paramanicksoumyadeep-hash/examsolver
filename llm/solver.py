@@ -16,33 +16,31 @@ MODEL_FALLBACKS = [
 prompt = PromptTemplate(
     input_variables=["exam", "questions"],
     template="""
-Solve {exam} questions.
+Solve the exam questions.
 
-STRICT OUTPUT RULES (MANDATORY):
+OUTPUT RULES (STRICT):
 
-1. MCQ (single correct):
-   - Output ONLY the option letter and option value: A, B, C, or D
-   - If the correct answer does NOT exactly match any option,
-     LEAVE THE ANSWER BLANK
+MCQ (single correct):
+- Output: A)OptionText
+- If no exact match → leave blank
 
-2. MSQ (multiple correct):
-   - Output option letters and option value
-   - Format: A, C (comma + space)
-   - Sort alphabetically
-   - If unsure or partial → LEAVE BLANK
+MSQ (multiple correct):
+- Output: A)OptionText, C)OptionText
+- Alphabetical order
+- If unsure/partial → leave blank
 
-3. NAT / Integer / Decimal:
-   - Output ONLY the numeric value and unit
+NAT (integer/decimal):
+- Output: numeric value + unit (if given)
+- No text explanation
 
-4. Negative marking applies:
-   - If unsure, DO NOT GUESS
-   - Blank answer is safer than wrong
+GENERAL:
+- One answer per line
+- Format: Q<number>: <answer>
+- If unsure → leave blank
+- Do NOT explain
+- Do NOT add extra text
 
-5. Output format is FIXED:
-   - One answer per line
-   - Question number followed by colon
-
-EXAMPLES:
+EXAMPLE:
 Q1: A)Starvation
 Q2: A)Deadlock, C)Hold and Wait
 Q3: 23cm
