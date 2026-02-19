@@ -4,7 +4,10 @@ from llm.solver import solve_exam
 from pdf_utils.generate_pdf import create_answer_pdf
 from grading.evaluate import parse_answers_robust, smart_evaluate
 
-# ------------------ Page Config ----------------
+st.write("Tesseract path:", shutil.which("tesseract"))
+
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
 st.set_page_config(page_title="AI Exam Solver & Evaluator", layout="centered")
 st.title("📘 AI Exam Solver & Evaluator")
 
