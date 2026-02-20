@@ -1,20 +1,21 @@
-import shutil
 import streamlit as st
+import shutil
+import pytesseract
+import base64
+
 from ocr.pdf_to_text import extract_text_from_pdf
 from llm.solver import solve_exam
 from pdf_utils.generate_pdf import create_answer_pdf
-from grading.evaluate import parse_answers_robust, smart_evaluate
-import pytesseract
+
+st.set_page_config(page_title="Exam Solver", layout="centered")
 
 st.write("Tesseract path:", shutil.which("tesseract"))
-
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
-st.set_page_config(page_title="AI Exam Solver & Evaluator", layout="centered")
-st.title("📘 AI Exam Solver & Evaluator")
+st.title("📘 Exam Solver")
 
-if "ai_answer_text" not in st.session_state:
-    st.session_state.ai_answer_text = None
+if "generated_pdf" not in st.session_state:
+    st.session_state.generated_pdf = None
 
 def split_into_questions(raw_text: str):
     blocks = raw_text.split("\nQ")
@@ -29,6 +30,7 @@ exam = st.text_input("Enter Exam Name (GATE / JEE / NEET / Custom)")
 question_pdf = st.file_uploader("Upload Question Paper PDF", type="pdf")
 
 if st.button("🚀 Solve Exam"):
+
     if question_pdf is None or not exam.strip():
         st.error("❌ Please upload PDF and enter exam name")
         st.stop()
@@ -46,48 +48,42 @@ if st.button("🚀 Solve Exam"):
 
     st.info(f"📄 Detected {len(question_list)} questions")
 
-    with st.spinner("🤖 Solving exam using AI..."):
-        answers = solve_exam(exam=exam, questions=question_list, batch_size=25)
+    with st.spinner("🤖 Solving exam..."):
+        answers = solve_exam(exam=exam, questions=question_list, batch_size=8)
 
     create_answer_pdf(answers)
-    st.session_state.ai_answer_text = extract_text_from_pdf("answers.pdf")
 
-    st.success("✅ Answer PDF Generated!")
     with open("answers.pdf", "rb") as f:
-        st.download_button("📄 Download AI Answers", f, "answers.pdf", "application/pdf")
+        pdf_bytes = f.read()
 
-st.header("📊 Evaluate Answers")
-official_pdf = st.file_uploader("Upload Official Answer Key PDF", type="pdf")
-st.subheader("📝 Evaluation Rules (MANDATORY)")
-rules_text = st.text_area(
-    "Enter marking & evaluation rules",
-    height=220,
-    placeholder="- MCQ: +1 for correct, -0.33 for incorrect\n- MSQ: +2 only if all correct, else 0\n- NAT: +2 exact match, no negative\n- Partial allowed if specified\n- Treat format mismatch as blank"
-)
-if st.button("🧮 Evaluate"):
-    if official_pdf is None or st.session_state.ai_answer_text is None:
-        st.error("❌ Upload official answer key and solve exam first")
-        st.stop()
+    st.session_state.generated_pdf = pdf_bytes
+    st.success("✅ Answer PDF Generated!")
 
-    if not rules_text.strip():
-        st.error("❌ Evaluation rules required")
-        st.stop()
+if st.session_state.generated_pdf:
 
-    with open("temp_official.pdf", "wb") as f:
-        f.write(official_pdf.read())
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    with st.spinner("📄 Reading official answer key..."):
-        off_text = extract_text_from_pdf("temp_official.pdf")
+    col1, col2, col3 = st.columns([1, 2, 1])
 
-    ai_answers = parse_answers_robust(st.session_state.ai_answer_text)
-    official_answers = parse_answers_robust(off_text)
+    with col2:
+        st.download_button(
+            label="📄 Download Answer PDF",
+            data=st.session_state.generated_pdf,
+            file_name="answers.pdf",
+            mime="application/pdf"
+        )
 
-    with st.spinner("🤖 Evaluating answers..."):
-        result = smart_evaluate(ai_answers, official_answers, rules_text)
+    st.markdown("---")
 
-    st.success("✅ Evaluation Complete")
+    base64_pdf = base64.b64encode(st.session_state.generated_pdf).decode("utf-8")
 
-    col1, col2 = st.columns(2)
-    col1.metric("Correct Questions", result["correct_count"])
-    col2.metric("Incorrect Questions", result["incorrect_count"])
-    st.metric("Final Score", f'{result["marks_obtained"]} / {result["total_marks"]}')
+    pdf_display = f"""
+    <iframe
+        src="data:application/pdf;base64,{base64_pdf}"
+        width="100%"
+        height="700px"
+        style="border:1px solid #ccc;">
+    </iframe>
+    """
+
+    st.markdown(pdf_display, unsafe_allow_html=True)
