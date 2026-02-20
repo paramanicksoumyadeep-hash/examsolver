@@ -57,7 +57,6 @@ NO extra text.
 """
 )
 
-# ---------------- Robust OCR Parsing ----------------
 def parse_answers_robust(text: str):
     """
     Parses OCR text into {Q#: answer} dictionary robustly.
@@ -72,11 +71,10 @@ def parse_answers_robust(text: str):
         if not line:
             continue
 
-        # Match question number + answer
         m = re.match(r"(Q\d+)[\s\.: -]*([\w, ]+)", line, re.I)
         if m:
             q = m.group(1).upper()
-            ans = m.group(2).replace(" ", "")  # remove spaces in answer
+            ans = m.group(2).replace(" ", "")  
             if "," in ans:
                 ans = sorted([x.strip().upper() for x in ans.split(",")])
             else:
@@ -84,7 +82,6 @@ def parse_answers_robust(text: str):
             answers[q] = ans
     return answers
 
-# ---------------- Answer Normalization ----------------
 def normalize_answer(ans):
     if isinstance(ans, str):
         ans = ans.strip().upper()
@@ -101,8 +98,6 @@ def normalize_answers_dict(answers_dict):
     for q, ans in answers_dict.items():
         normalized[q] = normalize_answer(ans)
     return normalized
-
-# ---------------- Local Evaluation ----------------
 def local_evaluate(student_answers: dict, official_answers: dict, rules_text: str):
     correct_count = 0
     incorrect_count = 0
@@ -169,7 +164,6 @@ def local_evaluate(student_answers: dict, official_answers: dict, rules_text: st
         "total_marks": total_marks
     }
 
-# ---------------- Smart Evaluation via Gemini ----------------
 def smart_evaluate(student_answers: dict, official_answers: dict, rules_text: str):
     student_answers = normalize_answers_dict(student_answers)
     official_answers = normalize_answers_dict(official_answers)
