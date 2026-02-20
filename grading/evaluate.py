@@ -4,8 +4,13 @@ import re
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 from google.api_core.exceptions import ResourceExhausted
+import streamlit as st
+import os
 
-API_KEY = "YOUR_GEMINI_API_KEY"
+if "GEMINI_API_KEY" in st.secrets:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+else:
+    API_KEY = os.getenv("GEMINI_API_KEY")
 
 MODEL_FALLBACKS = [
     "gemini-2.5-flash",
