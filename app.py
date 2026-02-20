@@ -24,16 +24,16 @@ h1 {
 .center-button {
     display: flex;
     justify-content: center;
-    margin-top: 30px;
+    margin-top: 40px;
     margin-bottom: 20px;
 }
 
 .center-button div.stButton > button {
-    width: 420px;
-    height: 70px;
+    width: 450px;
+    height: 75px;
     font-size: 22px;
     font-weight: 600;
-    border-radius: 16px;
+    border-radius: 18px;
     background: linear-gradient(90deg, #2563eb, #1e40af);
     color: white;
     border: none;
@@ -48,7 +48,7 @@ h1 {
 .download-center {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 30px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -105,21 +105,13 @@ if solve_clicked:
 
 if st.session_state.generated_pdf:
 
-    st.markdown("<hr>", unsafe_allow_html=True)
-
     st.markdown("<div class='download-center'>", unsafe_allow_html=True)
+
     st.download_button(
         label="📄 Download Answer PDF",
         data=st.session_state.generated_pdf,
         file_name="answers.pdf",
         mime="application/pdf"
     )
+
     st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.subheader("📄 Preview")
-
-    try:
-        st.pdf(st.session_state.generated_pdf)
-    except:
-        st.info("Preview not supported in this browser. Please download the PDF.")
