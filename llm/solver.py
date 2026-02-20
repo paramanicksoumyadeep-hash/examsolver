@@ -2,8 +2,13 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 from google.api_core.exceptions import ResourceExhausted
 import time
+import streamlit as st
+import os
 
-API_KEY = "AIzaSyDgyfY0nWwCaUKmFVwtSbA2UPdRxwBV9tI"
+if "GEMINI_API_KEY" in st.secrets:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+else:
+    API_KEY = os.getenv("GEMINI_API_KEY")
 
 MODEL_FALLBACKS = [
     "gemini-2.5-flash",
@@ -92,7 +97,7 @@ def solve_questions(exam, questions):
 # -------------------------------
 # 🔹 Batching logic (20–30 Qs)
 # -------------------------------
-def batch_questions(questions, batch_size=25):
+def batch_questions(questions, batch_size=10):
     for i in range(0, len(questions), batch_size):
         yield questions[i:i + batch_size]
 
