@@ -5,7 +5,6 @@ import time
 
 API_KEY = "AIzaSyDgyfY0nWwCaUKmFVwtSbA2UPdRxwBV9tI"
 
-# Models ordered from best → cheapest
 MODEL_FALLBACKS = [
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
@@ -59,9 +58,6 @@ QUESTIONS:
 """
 )
 
-# -------------------------------
-# 🔹 Model fallback solver
-# -------------------------------
 def solve_questions(exam, questions):
     last_error = None
 
@@ -101,9 +97,7 @@ def batch_questions(questions, batch_size=25):
         yield questions[i:i + batch_size]
 
 
-# -------------------------------
-# 🔹 Main exam solver (FIXED)
-# -------------------------------
+
 def solve_exam(exam, questions, batch_size=25):
     """
     exam: str
