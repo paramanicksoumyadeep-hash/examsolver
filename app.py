@@ -7,7 +7,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfbase import pdfmetrics
-
+import re
+import unicodedata
 from ocr.pdf_to_text import extract_text_from_pdf
 from llm.solver import solve_exam
 
@@ -75,6 +76,32 @@ def split_into_questions(raw_text: str):
             questions.append(q.strip())
     return questions
 
+def clean_text(text: str):
+    # Normalize unicode
+    text = unicodedata.normalize("NFKD", text)
+
+    # Replace common problematic characters
+    replacements = {
+        "–": "-",
+        "—": "-",
+        "’": "'",
+        "‘": "'",
+        "“": '"',
+        "”": '"',
+        "≥": ">=",
+        "≤": "<=",
+        "²": "^2",
+        "³": "^3",
+    }
+
+    for k, v in replacements.items():
+        text = text.replace(k, v)
+
+    # Remove any remaining weird characters
+    text = re.sub(r"[^\x00-\x7F]+", "", text)
+
+    return text
+
 
 def create_answer_pdf(answer_text, filename="answers.pdf"):
 
@@ -100,7 +127,9 @@ def create_answer_pdf(answer_text, filename="answers.pdf"):
 
     elements = []
 
-    for line in answer_text.split("\n"):
+    cleaned_text = clean_text(answer_text)
+
+    for line in cleaned_text.split("\n"):
 
         if line.strip() == "":
             elements.append(Spacer(1, 0.15 * inch))
@@ -113,7 +142,6 @@ def create_answer_pdf(answer_text, filename="answers.pdf"):
         elements.append(Paragraph(safe_line, style))
 
     doc.build(elements)
-
 
 exam = st.text_input("Enter Exam Name (GATE / JEE / NEET / Custom)")
 question_pdf = st.file_uploader("Upload Question Paper PDF", type="pdf")
