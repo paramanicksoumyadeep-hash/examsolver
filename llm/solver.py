@@ -23,39 +23,32 @@ prompt = PromptTemplate(
     template="""
 Solve the following {exam} questions.
 
-OUTPUT FORMAT (STRICT):
+For EACH question use this format:
 
-• One answer per line
-• Format: Q<number>: <answer>
-• No explanations
-• No extra text
+Question:
+<Write the full question>
 
-RULES:
+Solution (Brief):
+<Short, clear explanation. Keep it concise. No long derivations.>
 
-1) MCQ (single correct)
-   Output: Letter) Option Text
-   Example: Q1: A) Starvation
-   If no exact match → leave blank after colon
+Ans: <Final Answer>
 
-2) MSQ (multiple correct)
-   Output all correct options
-   Format: Letter) Text, Letter) Text
-   Letters sorted alphabetically
-   Example: Q2: A) Heat loss, C) Evaporation
-   If unsure → leave blank
+Rules:
 
-3) NAT (Integer/Decimal)
-   Output numeric value WITH unit (if applicable)
-   Example: Q3: 30 m/s
-   No explanation
+1) MCQ:
+   Ans: A) Option Text
 
-GENERAL EXAMPLE OUTPUT:
+2) MSQ:
+   Ans: A) Text, C) Text
+   (Sort letters alphabetically)
 
-Q1: A) Starvation
-Q2: A) Heat loss, C) Evaporation
-Q3: 30 m/s
-Q4:
-Q5: 0.25 kg
+3) NAT:
+   Ans: 30 m/s
+   (Include unit if applicable)
+
+Keep answers precise.
+No unnecessary commentary.
+Maintain clean formatting.
 
 QUESTIONS:
 {questions}
