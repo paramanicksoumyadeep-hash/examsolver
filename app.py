@@ -11,37 +11,49 @@ pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 st.markdown("""
 <style>
-.main {
-    background-color: #f7f9fc;
-}
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
 }
-.big-button button {
-    width: 100%;
-    height: 60px;
-    font-size: 20px;
+
+h1 {
+    text-align: center;
+    font-weight: 700;
+}
+
+.center-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.center-button div.stButton > button {
+    width: 420px;
+    height: 70px;
+    font-size: 22px;
     font-weight: 600;
-    border-radius: 12px;
-    background-color: #2563eb;
-    color: white;
-    transition: 0.3s ease;
-}
-.big-button button:hover {
-    background-color: #1e40af;
-    transform: scale(1.03);
-}
-.card {
-    padding: 2rem;
     border-radius: 16px;
-    background-color: white;
-    box-shadow: 0px 4px 20px rgba(0,0,0,0.08);
+    background: linear-gradient(90deg, #2563eb, #1e40af);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.center-button div.stButton > button:hover {
+    transform: scale(1.06);
+    background: linear-gradient(90deg, #1e40af, #1e3a8a);
+}
+
+.download-center {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align: center;'>📘 Exam Solver</h1>", unsafe_allow_html=True)
+st.title("📘 Exam Solver")
 
 if "generated_pdf" not in st.session_state:
     st.session_state.generated_pdf = None
@@ -55,19 +67,12 @@ def split_into_questions(raw_text: str):
             questions.append(q.strip())
     return questions
 
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-
 exam = st.text_input("Enter Exam Name (GATE / JEE / NEET / Custom)")
 question_pdf = st.file_uploader("Upload Question Paper PDF", type="pdf")
 
+st.markdown("<div class='center-button'>", unsafe_allow_html=True)
+solve_clicked = st.button("🚀 Solve Exam")
 st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-col1, col2, col3 = st.columns([1, 2, 1])
-
-with col2:
-    solve_clicked = st.button("🚀 Solve Exam", key="solve", help="Start solving exam")
 
 if solve_clicked:
 
@@ -100,17 +105,16 @@ if solve_clicked:
 
 if st.session_state.generated_pdf:
 
-    st.markdown("<br><hr><br>", unsafe_allow_html=True)
+    st.markdown("<hr>", unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 2, 1])
-
-    with col2:
-        st.download_button(
-            label="📄 Download Answer PDF",
-            data=st.session_state.generated_pdf,
-            file_name="answers.pdf",
-            mime="application/pdf"
-        )
+    st.markdown("<div class='download-center'>", unsafe_allow_html=True)
+    st.download_button(
+        label="📄 Download Answer PDF",
+        data=st.session_state.generated_pdf,
+        file_name="answers.pdf",
+        mime="application/pdf"
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.subheader("📄 Preview")
