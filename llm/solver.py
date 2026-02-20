@@ -21,44 +21,44 @@ MODEL_FALLBACKS = [
 prompt = PromptTemplate(
     input_variables=["exam", "questions"],
     template="""
-Solve {exam} questions.
+Solve the following {exam} questions.
 
-STRICT OUTPUT RULES (MANDATORY):
+OUTPUT FORMAT (STRICT):
 
-1. MCQ (single correct):
-   - Output ONLY the option letter: A, B, C, or D
-   - NEVER output the option value (e.g. 30, 36, 2097152)
-   - If the correct answer does NOT exactly match any option,
-     LEAVE THE ANSWER BLANK
+• One answer per line
+• Format: Q<number>: <answer>
+• No explanations
+• No extra text
 
-2. MSQ (multiple correct):
-   - Output option letters only
-   - Format: A, C (comma + space)
-   - Sort alphabetically
-   - If unsure or partial → LEAVE BLANK
+RULES:
 
-3. NAT / Integer / Decimal:
-   - Output ONLY the numeric value
-   - No units, no text
+1) MCQ (single correct)
+   Output: Letter) Option Text
+   Example: Q1: A) Starvation
+   If no exact match → leave blank after colon
 
-4. Negative marking applies:
-   - If unsure, DO NOT GUESS
-   - Blank answer is safer than wrong
+2) MSQ (multiple correct)
+   Output all correct options
+   Format: Letter) Text, Letter) Text
+   Letters sorted alphabetically
+   Example: Q2: A) Heat loss, C) Evaporation
+   If unsure → leave blank
 
-5. Output format is FIXED:
-   - One answer per line
-   - Question number followed by colon
+3) NAT (Integer/Decimal)
+   Output numeric value WITH unit (if applicable)
+   Example: Q3: 30 m/s
+   No explanation
 
-EXAMPLES:
-Q1: A
-Q2: A, C
-Q3: 12
+GENERAL EXAMPLE OUTPUT:
+
+Q1: A) Starvation
+Q2: A) Heat loss, C) Evaporation
+Q3: 30 m/s
 Q4:
-Q5: 0.25
+Q5: 0.25 kg
 
 QUESTIONS:
 {questions}
-
 
 """
 )
