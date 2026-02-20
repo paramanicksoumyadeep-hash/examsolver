@@ -1,12 +1,16 @@
 import streamlit as st
 import pytesseract
+
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+from reportlab.pdfbase import pdfmetrics
 
 from ocr.pdf_to_text import extract_text_from_pdf
 from llm.solver import solve_exam
+
 
 st.set_page_config(page_title="Exam Solver", layout="centered")
 
@@ -61,6 +65,7 @@ st.title("📘 Exam Solver")
 if "generated_pdf" not in st.session_state:
     st.session_state.generated_pdf = None
 
+
 def split_into_questions(raw_text: str):
     blocks = raw_text.split("\nQ")
     questions = []
@@ -70,7 +75,10 @@ def split_into_questions(raw_text: str):
             questions.append(q.strip())
     return questions
 
+
 def create_answer_pdf(answer_text, filename="answers.pdf"):
+
+    pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
 
     doc = SimpleDocTemplate(
         filename,
@@ -81,16 +89,13 @@ def create_answer_pdf(answer_text, filename="answers.pdf"):
         bottomMargin=50
     )
 
-    styles = getSampleStyleSheet()
-
-    safe_style = ParagraphStyle(
-        'SafeStyle',
-        parent=styles['Normal'],
-        fontName="Helvetica",
+    style = ParagraphStyle(
+        name='UnicodeStyle',
+        fontName='STSong-Light',
         fontSize=10.5,
         leading=14,
         wordWrap='CJK',
-        spaceAfter=6,
+        spaceAfter=6
     )
 
     elements = []
@@ -105,9 +110,10 @@ def create_answer_pdf(answer_text, filename="answers.pdf"):
                         .replace("<", "&lt;") \
                         .replace(">", "&gt;")
 
-        elements.append(Paragraph(safe_line, safe_style))
+        elements.append(Paragraph(safe_line, style))
 
     doc.build(elements)
+
 
 exam = st.text_input("Enter Exam Name (GATE / JEE / NEET / Custom)")
 question_pdf = st.file_uploader("Upload Question Paper PDF", type="pdf")
@@ -115,6 +121,7 @@ question_pdf = st.file_uploader("Upload Question Paper PDF", type="pdf")
 st.markdown("<div class='center-button'>", unsafe_allow_html=True)
 solve_clicked = st.button("🚀 Solve Exam")
 st.markdown("</div>", unsafe_allow_html=True)
+
 
 if solve_clicked:
 
@@ -144,6 +151,7 @@ if solve_clicked:
         st.session_state.generated_pdf = f.read()
 
     st.success("✅ Answer PDF Generated!")
+
 
 if st.session_state.generated_pdf:
 
