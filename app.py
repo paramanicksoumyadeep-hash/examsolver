@@ -1,7 +1,5 @@
 import streamlit as st
-import shutil
 import pytesseract
-import base64
 
 from ocr.pdf_to_text import extract_text_from_pdf
 from llm.solver import solve_exam
@@ -9,10 +7,41 @@ from pdf_utils.generate_pdf import create_answer_pdf
 
 st.set_page_config(page_title="Exam Solver", layout="centered")
 
-st.write("Tesseract path:", shutil.which("tesseract"))
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
-st.title("📘 Exam Solver")
+st.markdown("""
+<style>
+.main {
+    background-color: #f7f9fc;
+}
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+.big-button button {
+    width: 100%;
+    height: 60px;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 12px;
+    background-color: #2563eb;
+    color: white;
+    transition: 0.3s ease;
+}
+.big-button button:hover {
+    background-color: #1e40af;
+    transform: scale(1.03);
+}
+.card {
+    padding: 2rem;
+    border-radius: 16px;
+    background-color: white;
+    box-shadow: 0px 4px 20px rgba(0,0,0,0.08);
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("<h1 style='text-align: center;'>📘 Exam Solver</h1>", unsafe_allow_html=True)
 
 if "generated_pdf" not in st.session_state:
     st.session_state.generated_pdf = None
@@ -26,10 +55,21 @@ def split_into_questions(raw_text: str):
             questions.append(q.strip())
     return questions
 
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+
 exam = st.text_input("Enter Exam Name (GATE / JEE / NEET / Custom)")
 question_pdf = st.file_uploader("Upload Question Paper PDF", type="pdf")
 
-if st.button("🚀 Solve Exam"):
+st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([1, 2, 1])
+
+with col2:
+    solve_clicked = st.button("🚀 Solve Exam", key="solve", help="Start solving exam")
+
+if solve_clicked:
 
     if question_pdf is None or not exam.strip():
         st.error("❌ Please upload PDF and enter exam name")
@@ -54,14 +94,13 @@ if st.button("🚀 Solve Exam"):
     create_answer_pdf(answers)
 
     with open("answers.pdf", "rb") as f:
-        pdf_bytes = f.read()
+        st.session_state.generated_pdf = f.read()
 
-    st.session_state.generated_pdf = pdf_bytes
     st.success("✅ Answer PDF Generated!")
 
 if st.session_state.generated_pdf:
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br><hr><br>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
 
@@ -73,17 +112,10 @@ if st.session_state.generated_pdf:
             mime="application/pdf"
         )
 
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.subheader("📄 Preview")
 
-    base64_pdf = base64.b64encode(st.session_state.generated_pdf).decode("utf-8")
-
-    pdf_display = f"""
-    <iframe
-        src="data:application/pdf;base64,{base64_pdf}"
-        width="100%"
-        height="700px"
-        style="border:1px solid #ccc;">
-    </iframe>
-    """
-
-    st.markdown(pdf_display, unsafe_allow_html=True)
+    try:
+        st.pdf(st.session_state.generated_pdf)
+    except:
+        st.info("Preview not supported in this browser. Please download the PDF.")
