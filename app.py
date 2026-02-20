@@ -1,9 +1,12 @@
 import streamlit as st
 import pytesseract
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import inch
 
 from ocr.pdf_to_text import extract_text_from_pdf
 from llm.solver import solve_exam
-from pdf_utils.generate_pdf import create_answer_pdf
 
 st.set_page_config(page_title="Exam Solver", layout="centered")
 
@@ -29,7 +32,7 @@ h1 {
 }
 
 .center-button div.stButton > button {
-    width: 450px;
+    width: 480px;
     height: 75px;
     font-size: 22px;
     font-weight: 600;
@@ -66,6 +69,45 @@ def split_into_questions(raw_text: str):
             q = block if i == 0 else "Q" + block
             questions.append(q.strip())
     return questions
+
+def create_answer_pdf(answer_text, filename="answers.pdf"):
+
+    doc = SimpleDocTemplate(
+        filename,
+        pagesize=A4,
+        rightMargin=50,
+        leftMargin=50,
+        topMargin=50,
+        bottomMargin=50
+    )
+
+    styles = getSampleStyleSheet()
+
+    safe_style = ParagraphStyle(
+        'SafeStyle',
+        parent=styles['Normal'],
+        fontName="Helvetica",
+        fontSize=10.5,
+        leading=14,
+        wordWrap='CJK',
+        spaceAfter=6,
+    )
+
+    elements = []
+
+    for line in answer_text.split("\n"):
+
+        if line.strip() == "":
+            elements.append(Spacer(1, 0.15 * inch))
+            continue
+
+        safe_line = line.replace("&", "&amp;") \
+                        .replace("<", "&lt;") \
+                        .replace(">", "&gt;")
+
+        elements.append(Paragraph(safe_line, safe_style))
+
+    doc.build(elements)
 
 exam = st.text_input("Enter Exam Name (GATE / JEE / NEET / Custom)")
 question_pdf = st.file_uploader("Upload Question Paper PDF", type="pdf")
