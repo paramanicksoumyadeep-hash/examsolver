@@ -103,7 +103,7 @@ def batch_questions(questions, batch_size=10):
 
 
 
-def solve_exam(exam, questions, batch_size=25):
+def solve_exam(exam, questions, batch_size=10):
     """
     exam: str
     questions: list[str]
