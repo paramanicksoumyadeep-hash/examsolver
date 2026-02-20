@@ -13,11 +13,9 @@ pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 st.set_page_config(page_title="AI Exam Solver & Evaluator", layout="centered")
 st.title("📘 AI Exam Solver & Evaluator")
 
-# ------------------ Session State ----------------
 if "ai_answer_text" not in st.session_state:
     st.session_state.ai_answer_text = None
 
-# ------------------ Helpers ----------------
 def split_into_questions(raw_text: str):
     blocks = raw_text.split("\nQ")
     questions = []
@@ -27,11 +25,9 @@ def split_into_questions(raw_text: str):
             questions.append(q.strip())
     return questions
 
-# ------------------ UI Inputs ----------------
 exam = st.text_input("Enter Exam Name (GATE / JEE / NEET / Custom)")
 question_pdf = st.file_uploader("Upload Question Paper PDF", type="pdf")
 
-# ------------------ Solve Exam ----------------
 if st.button("🚀 Solve Exam"):
     if question_pdf is None or not exam.strip():
         st.error("❌ Please upload PDF and enter exam name")
@@ -60,7 +56,6 @@ if st.button("🚀 Solve Exam"):
     with open("answers.pdf", "rb") as f:
         st.download_button("📄 Download AI Answers", f, "answers.pdf", "application/pdf")
 
-# ------------------ Evaluation Section ----------------
 st.header("📊 Evaluate Answers")
 official_pdf = st.file_uploader("Upload Official Answer Key PDF", type="pdf")
 st.subheader("📝 Evaluation Rules (MANDATORY)")
@@ -69,8 +64,6 @@ rules_text = st.text_area(
     height=220,
     placeholder="- MCQ: +1 for correct, -0.33 for incorrect\n- MSQ: +2 only if all correct, else 0\n- NAT: +2 exact match, no negative\n- Partial allowed if specified\n- Treat format mismatch as blank"
 )
-
-# ------------------ Evaluate ----------------
 if st.button("🧮 Evaluate"):
     if official_pdf is None or st.session_state.ai_answer_text is None:
         st.error("❌ Upload official answer key and solve exam first")
