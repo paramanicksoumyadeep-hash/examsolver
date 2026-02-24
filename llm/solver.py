@@ -87,9 +87,6 @@ def solve_questions(exam, questions):
     raise RuntimeError("❌ All Gemini models exhausted")
 
 
-# -------------------------------
-# 🔹 Batching logic (20–30 Qs)
-# -------------------------------
 def batch_questions(questions, batch_size=10):
     for i in range(0, len(questions), batch_size):
         yield questions[i:i + batch_size]
