@@ -23,7 +23,7 @@ It is designed for academic, research, and demonstration purposes where automate
 
 ## 🧠 Tech Stack
 
-- **App Framework:** :contentReference[oaicite:0]{index=0}  
+- **App Framework:** :streamlit
 - **PDF Processing:** PyMuPDF  
 - **OCR Engine:** Tesseract-OCR  
 - **LLM for Solving:** :contentReference[oaicite:1]{index=1} (Gemini-2.5-Flash)  
